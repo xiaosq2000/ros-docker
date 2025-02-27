@@ -72,4 +72,5 @@ USER {{ ros_distro }}
 # Source ROS environment
 RUN echo "source /opt/ros/{{ ros_distro }}/setup.bash" >> ~/.bashrc
 
+WORKDIR /home/{{ ros_distro }}
 CMD ["bash"]
