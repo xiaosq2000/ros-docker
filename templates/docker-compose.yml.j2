@@ -1,0 +1,97 @@
+services:
+  {{ service_name }}:
+    build:
+      context: .
+      dockerfile: {{ dockerfile_path }}
+      args:
+        HOST_GID: $GID
+        HOST_UID: $UID
+    image: {{ image_name }}
+    container_name: {{ container_name }}
+    tty: true
+    stdin_open: true
+
+    user: $UID:$GID
+
+    {% if network_mode -%}
+    network_mode: {{ network_mode }}
+    {%- endif %}
+
+    {% if environment or x11 or dbus -%}
+    environment:
+      # XDG Base Directory Specification
+      - XDG_RUNTIME_DIR=/run/user/${UID}
+      - XDG_CONFIG_HOME=/home/{{ ros_distro }}/.config
+      - XDG_CACHE_HOME=/home/{{ ros_distro }}/.cache
+      - XDG_DATA_HOME=/home/{{ ros_distro }}/.local/share
+      - XDG_STATE_HOME=/home/{{ ros_distro }}/.local/state
+      - XDG_CONFIG_DIRS=/etc/xdg
+      - XDG_DATA_DIRS=/usr/local/share:/usr/share
+      # XDG User Directory Specification
+      - XDG_DESKTOP_DIR=/home/{{ ros_distro }}/Desktop
+      - XDG_DOWNLOAD_DIR=/home/{{ ros_distro }}/Downloads
+      - XDG_DOCUMENTS_DIR=/home/{{ ros_distro }}/Documents
+      - XDG_MUSIC_DIR=/home/{{ ros_distro }}/Music
+      - XDG_PICTURES_DIR=/home/{{ ros_distro }}/Pictures
+      - XDG_VIDEOS_DIR=/home/{{ ros_distro }}/Videos
+      - XDG_TEMPLATES_DIR=/home/{{ ros_distro }}/Templates
+      - XDG_PUBLICSHARE_DIR=/home/{{ ros_distro }}/Public
+      {% if x11 -%}
+      # X11
+      - DISPLAY=$DISPLAY
+      - XAUTHORITY=${XAUTHORITY:-/home/{{ ros_distro }}/.Xauthority}
+      {%- endif %}
+      {% if dbus -%}
+      # DBUS
+      - DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+      {%- endif %}
+      {% if environment -%}
+      #
+      {% for key, value in environment.items() -%}
+      - {{ key }}={{ value }}
+      {% endfor %}
+      {%- endif %}
+    {%- endif %}
+
+    {% if volumes or x11 or dbus -%}
+    volumes:
+      {% if volumes -%}
+      {% for volume in volumes -%}
+      - {{ volume }}
+      {% endfor %}
+      {%- endif %}
+      {% if x11 -%}
+      # X11
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/home/{{ ros_distro }}/.Xauthority:rw
+      {%- endif %}
+      {% if dbus -%}
+      # DBUS
+      - /var/run/dbus:/var/run/dbus:rw # system
+      - ${XDG_RUNTIME_DIR}:${XDG_RUNTIME_DIR}:rw # user
+      {%- endif %}
+    {%- endif %}
+
+    {% if nvidia -%}
+    # NVIDIA GPU
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    runtime: nvidia
+    {%- endif %}
+
+    {% if dbus -%}
+    # DBUS
+    security_opt:
+      - apparmor:unconfined
+    {%- endif %}
+    {% if ipc or dbus -%}
+    ipc: host
+    {%- endif %}
+    {% if privileged or dbus -%}
+    privileged: true
+    {%- endif %}

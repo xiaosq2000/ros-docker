@@ -1,0 +1,78 @@
+FROM {{ base_image }}
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    software-properties-common && \
+    add-apt-repository universe && \
+    add-apt-repository restricted && \
+    add-apt-repository multiverse && \
+    apt-get update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get install -y --no-install-recommends \
+    tzdata \
+    locales \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+# Install required packages
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    lsb-release \
+    gnupg2 \
+    curl \
+    git \
+    build-essential \
+    python3-pip \
+    python3-venv \
+    xauth \
+    vim \
+    {% if system_packages is defined and system_packages -%}
+    {%- for package in system_packages -%}
+    {{ package }} \
+    {% endfor -%}
+    {%- endif -%}
+    && rm -rf /var/lib/apt/lists/*
+
+{% if ros_distro in ["noetic"] -%}
+# Setup ROS1 repositories
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list' && \
+    curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+{%- elif ros_distro in ["foxy", "galactic", "humble", "iron"] -%}
+# Setup ROS2 repositories
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/ros2.list > /dev/null
+{%- endif %}
+
+# Install ROS {{ ros_distro }}
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ros-{{ ros_distro }}-{{ ros_package }} \
+    {% if ros_distro in ["noetic"] -%}
+    python3-rosdep \
+    python3-rosinstall \
+    python3-rosinstall-generator \
+    python3-wstool \
+    {%- else -%}
+    python3-colcon-common-extensions \
+    python3-rosdep \
+    {%- endif %}
+    && rm -rf /var/lib/apt/lists/*
+
+# Initialize rosdep
+RUN rosdep init && \
+    rosdep update
+
+ARG HOST_UID
+ARG HOST_GID
+
+RUN groupadd --gid ${HOST_GID} {{ ros_distro }} && \
+    useradd -m -u ${HOST_UID} -g ${HOST_GID} -d /home/{{ ros_distro }} -s /bin/bash {{ ros_distro }}
+
+USER {{ ros_distro }}
+
+# Source ROS environment
+{% if ros_distro in ["noetic"] -%}
+RUN echo "source /opt/ros/{{ ros_distro }}/setup.bash" >> ~/.bashrc
+{%- endif %}
+
+CMD ["bash"]

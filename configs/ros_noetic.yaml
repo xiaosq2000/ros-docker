@@ -1,0 +1,29 @@
+ros_distro: "noetic"
+base_image: "ubuntu:20.04"
+service_name: "ros-noetic"
+image_name: "ros-docker:noetic"
+container_name: "ros-noetic-container"
+dockerfile_path: "Dockerfile.noetic"
+ros_package: "desktop-full"
+system_packages:
+  - dbus
+  - dbus-x11
+  - x11-apps
+  - xclip
+  - xdotool
+  - zsh
+  - neovim
+  - fd-find
+  - ripgrep
+  - tmux
+  - git-lfs
+  - openssh-server
+volumes:
+  - "~/Projects:/home/noetic/Projects:rw"
+environment:
+  ROS_MASTER_URI: "http://localhost:11311"
+  ROS_HOSTNAME: "localhost"
+network_mode: "host"
+x11: true
+dbus: true
+nvidia: true
