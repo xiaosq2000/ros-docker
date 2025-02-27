@@ -12,11 +12,11 @@ A Python-based tool to generate Docker environments for ROS (Robot Operating Sys
 
 ## Prerequisites
 
-Before using this tool, ensure you have the following prerequisites installed:
+Ensure you have the following installed and configured:
 
-- **Docker**
-- **NVIDIA Container Toolkit** (if using NVIDIA GPU support)
-- **uv** (recommended)
+- [Docker](https://docs.docker.com/engine/install/)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#) (required if using NVIDIA GPU support)
+- [uv](https://docs.astral.sh/uv/) (optional while highly recommended)
 
 ## Installation
 
@@ -26,12 +26,7 @@ Before using this tool, ensure you have the following prerequisites installed:
    cd ros-docker
    ```
 
-2. Install dependencies using uv (recommended):
-   ```bash
-   uv sync
-   ```
-
-   Or using pip:
+2. If `uv` is not installed, use `pip` to install the dependencies:
    ```bash
    python -m venv .venv
    source .venv/bin/activate
@@ -40,10 +35,12 @@ Before using this tool, ensure you have the following prerequisites installed:
 
 ## Usage
 
+> [!TIP]
+> In the following shell commands, use `uv run` instead of `python` if `uv` is available.
+
 ### List Available ROS Distributions
 
 To see all available ROS distributions that can be generated:
-
 ```bash
 python ros-docker.py list
 ```
@@ -58,12 +55,10 @@ python ros-docker.py generate noetic
 
 > [!TIP]
 > 1. Preview the generated files without saving them:
->
 >    ```bash
 >    python ros-docker.py generate noetic --preview
 >    ```
 > 2. Specify a custom output directory:
-> 
 >    ```bash
 >    python ros-docker.py generate noetic --output-dir my_ros_docker
 >    ```

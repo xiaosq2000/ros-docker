@@ -1,0 +1,29 @@
+ros_distro: "humble"
+base_image: "ubuntu:22.04"
+service_name: "ros-humble"
+image_name: "ros-docker:humble"
+container_name: "ros-humble-container"
+dockerfile_path: "Dockerfile.humble"
+ros_package: "desktop"
+system_packages:
+  - dbus
+  - dbus-x11
+  - x11-apps
+  - xclip
+  - xdotool
+  - zsh
+  - neovim
+  - fd-find
+  - ripgrep
+  - tmux
+  - git-lfs
+  - openssh-server
+volumes:
+  - "~/Projects:/home/humble/Projects:rw"
+environment:
+  TERM: xterm-256color
+
+network_mode: "host"
+x11: true
+dbus: true
+nvidia: true
