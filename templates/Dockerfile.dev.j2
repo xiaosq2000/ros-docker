@@ -1,0 +1,67 @@
+# Development environment extending the base ROS image
+FROM {{ base_image_name }}
+
+USER root
+
+# Install development tools by APT
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    {% for package in dev_packages -%}
+    {{ package }} \
+    {% endfor -%}
+    && rm -rf /var/lib/apt/lists/*
+
+{% if zsh_version -%}
+# TODO: multi-stage build
+ARG ZSH_VERSION={{ zsh_version }}
+RUN if [ "$(zsh --version | cut -d' ' -f2)" != "$ZSH_VERSION" ]; then \
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -qy --no-install-recommends \
+    libncurses-dev && \
+    rm -rf /var/lib/apt/lists/* && \
+    wget https://downloads.sourceforge.net/project/zsh/zsh/${ZSH_VERSION}/zsh-${ZSH_VERSION}.tar.xz && \
+    mkdir zsh-${ZSH_VERSION} && tar -xf zsh-${ZSH_VERSION}.tar.xz --strip-component=1 -C zsh-${ZSH_VERSION} && rm *.tar.xz && \
+    cd zsh-${ZSH_VERSION} && \
+    ./configure --prefix /home/{{ ros_distro }}/.local --with-term-lib="ncursesw" --with-tcsetpgrp && \
+    make -j && make install && \
+    cd .. && rm -r zsh-${ZSH_VERSION} \
+    ;fi
+{%- endif %}
+
+{% if zsh_by_default -%}
+{% if zsh_version -%}
+RUN chsh -s /home/{{ ros_distro }}/.local/bin/zsh {{ ros_distro }}
+{% else %}
+RUN chsh -s /usr/bin/zsh {{ ros_distro }}
+{%- endif %}
+{%- endif %}
+
+RUN chown -R {{ ros_distro }}:{{ ros_distro }} /home/{{ ros_distro }}
+
+USER {{ ros_distro }}
+WORKDIR /home/{{ ros_distro }}
+
+{% if ohmyzsh -%}
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+{%- endif %}
+
+{% if neovim_version -%}
+ARG NEOVIM_VERSION={{ neovim_version }}
+ARG NEOVIM_OS="linux"
+ARG NEOVIM_ARCH="x86_64"
+# ref: https://github.com/neovim/neovim/releases/tag/v0.10.4
+# a breaking change of binary releases naming.
+RUN if [ "$(nvim --version | head -n1 | cut -d' ' -f2)" != "v${NEOVIM_VERSION}" ]; then \
+    wget "https://github.com/neovim/neovim/releases/download/v${NEOVIM_VERSION}/nvim-${NEOVIM_OS}-${NEOVIM_ARCH}.tar.gz" -O nvim-${NEOVIM_OS}-${NEOVIM_ARCH}.tar.gz && \
+    tar -xf nvim-${NEOVIM_OS}-${NEOVIM_ARCH}.tar.gz && \
+    export SRC_DIR="${PWD}/nvim-${NEOVIM_OS}-${NEOVIM_ARCH}" && export DEST_DIR="/home/{{ ros_distro }}/.local" && \
+    (cd ${SRC_DIR} && find . -type f -exec install -Dm 755 "{}" "${DEST_DIR}/{}" \;) && \
+    rm -r nvim-${NEOVIM_OS}-${NEOVIM_ARCH}.tar.gz nvim-${NEOVIM_OS}-${NEOVIM_ARCH} \
+    ;fi
+{%- endif %}
+
+{% if extra_commands -%}
+{% for command in extra_commands -%}
+RUN {{ command }}
+{% endfor -%}
+{% endif %}
+
+CMD ["{% if zsh_by_default %}{% if zsh_version %}/home/{{ ros_distro }}/.local/bin/zsh{% else %}/usr/bin/zsh{% endif %}{% else %}bash{% endif %}"]

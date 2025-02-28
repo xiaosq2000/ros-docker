@@ -73,4 +73,5 @@ USER {{ ros_distro }}
 RUN echo "source /opt/ros/{{ ros_distro }}/setup.bash" >> ~/.bashrc
 
 WORKDIR /home/{{ ros_distro }}
+SHELL ["bash", "-c"]
 CMD ["bash"]
