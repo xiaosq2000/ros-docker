@@ -1,69 +1,84 @@
 # ROS Docker
 
-A Python-based tool to generate Docker environments for ROS (Robot Operating System) distributions. Easily create and configure containerized ROS environments with customizable settings.
+A Python-based CLI tool to generate Docker environments for various ROS (Robot Operating System) distributions.
 
-## Features
-
-- Generate Dockerfiles and docker-compose configurations for different ROS distributions
-- Support for X11 forwarding for GUI applications
-- NVIDIA GPU support for hardware acceleration
-- D-Bus integration for system communications
-- Customizable system packages and environment variables
+Easily create and configure containerized ROS environments with customizable settings.
 
 ## Prerequisites
 
 Ensure you have the following installed and configured:
 
 - [Docker](https://docs.docker.com/engine/install/)
-- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#) (required if using NVIDIA GPU support)
-- [uv](https://docs.astral.sh/uv/) (optional while highly recommended)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html#) (required if using NVIDIA GPU)
+- [uv](https://docs.astral.sh/uv/) (optional and recommended)
 
-## Installation
+## Get Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/xiaosq2000/ros-docker.git
-   cd ros-docker
-   ```
+### Clone the Repository
 
-2. If `uv` is not installed, use `pip` to install the dependencies:
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate
-   pip install -e .
-   ```
+```bash
+git clone https://github.com/xiaosq2000/ros-docker.git
+cd ros-docker
+```
 
-## Usage
-
-> [!TIP]
-> In the following shell commands, use `uv run` instead of `python` if `uv` is available.
+> [!NOTE]
+> If `uv` is unavailable:
+> 1. Install the dependencies at first:
+>  ```bash
+>  python -m venv .venv
+>  source .venv/bin/activate
+>  pip install -e .
+>  ```
+> 2. In the following shell commands, use `python` instead of `uv run`.
 
 ### List Available ROS Distributions
 
 To see all available ROS distributions that can be generated:
 ```bash
-python ros-docker.py list
+uv run ros-docker.py list
 ```
+
+[![asciicast-list](https://asciinema.org/a/lV1pG47m55K2QqsFPQHpZcjIl.svg)](https://asciinema.org/a/lV1pG47m55K2QqsFPQHpZcjIl)
+
+Take ROS1 Noetic as an example.
 
 ### Generate Docker Files
 
 Generate Docker files for a specific ROS distribution:
 
 ```bash
-python ros-docker.py generate noetic
+uv run ros-docker.py generate noetic
 ```
+
+[![asciicast-generate](https://asciinema.org/a/9SKLe3k4ZMxfw279FfsKTJ7yV.svg)](https://asciinema.org/a/9SKLe3k4ZMxfw279FfsKTJ7yV)
 
 > [!TIP]
 > 1. Preview the generated files without saving them:
 >    ```bash
->    python ros-docker.py generate noetic --preview
+>    uv run ros-docker.py generate noetic --preview
 >    ```
-> 2. Specify a custom output directory:
+> 2. Specify a custom output directory (default: './generated'):
 >    ```bash
->    python ros-docker.py generate noetic --output-dir my_ros_docker
+>    uv run ros-docker.py generate noetic --output-dir ./generated/noetic 
 >    ```
+
+### Build and Run
+
+```sh
+cd generated
+docker compose -f docker-compose.noetic.yml up --build -d
+```
+
+[![asciicast](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ.svg)](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ)
+
+### Ready to go
+
+```sh
+docker exec -it ros-noetic-container bash
+```
+
+[![asciicast](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW.svg)](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW)
 
 ## Customization
 
 You can customize the Docker environment by editing the YAML configuration files in the `configs` directory. Each ROS distribution has its own configuration file, e.g., `configs/ros_noetic.yaml`.
-
