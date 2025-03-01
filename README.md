@@ -69,16 +69,29 @@ cd generated
 docker compose -f docker-compose.noetic.yml up --build -d
 ```
 
-[![asciicast](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ.svg)](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ)
+[![asciicast-build-and-run](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ.svg)](https://asciinema.org/a/wFgrt0IjXlMZXaJ8RX1bChstQ)
 
-### Ready to go
+### Interact with the Container
 
 ```sh
 docker exec -it ros-noetic-container bash
 ```
 
-[![asciicast](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW.svg)](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW)
+[![asciicast-roscore](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW.svg)](https://asciinema.org/a/aJK3gOdr6wcnR0SFCqGYILBWW)
 
 ## Customization
 
+### Base Docker Images
+
 You can customize the Docker environment by editing the YAML configuration files in the `configs` directory. Each ROS distribution has its own configuration file, e.g., `configs/ros_noetic.yaml`.
+
+### Development Docker Images
+
+The tool supports creating development environments with custom tooling and configurations through development profiles.
+
+Create your own development profiles by adding YAML files to the `configs/dev_profiles/` directory.
+
+```bash
+uv run ros-docker.py list-profiles
+uv run ros-docker.py generate-dev <ros-distro> --profile <your-profile>
+```
