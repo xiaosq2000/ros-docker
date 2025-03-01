@@ -1,0 +1,49 @@
+url: "https://github.com/xiaosq2000/dotfiles"
+dev_packages:
+  - zsh
+  - neovim
+  - tmux
+  - fd-find
+  - ripgrep
+  - xclip
+  - wl-clipboard
+  - git-lfs
+  - openssh-server
+  - file
+  - curl
+  - wget
+  - unzip
+  # - fzf # maybe too old
+  - jq
+  - htop
+
+# zsh
+zsh_version: 5.9
+ohmyzsh: true
+zsh_by_default: true
+
+# neovim
+neovim_version: 0.10.4
+
+extra_commands:
+  # my dotfiles and utilities 
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/install.sh | bash"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/starship.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/rust.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/node.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/fzf.sh | zsh"
+  - ". $HOME/.cargo/env && curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/yazi.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/tpm.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/google_drive_upload.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/lazydocker.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/luarocks.sh | zsh"
+  # git setup
+  - "git config --global user.name 'Shuqi Xiao' && git config --global user.email 'xiaosq2000@gmail.com'"
+  - "git lfs install"
+
+volumes:
+  - "~/Projects:/home/noetic/Projects:rw"
+  - "~/.ssh:/home/noetic/.ssh:rw"
+
+environment:
+  TERM: xterm-256color

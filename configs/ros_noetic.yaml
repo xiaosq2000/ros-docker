@@ -9,19 +9,7 @@ system_packages:
   - dbus
   - dbus-x11
   - x11-apps
-  - xclip
-  - xdotool
-  - zsh
-  - neovim
-  - fd-find
-  - ripgrep
-  - tmux
-  - git-lfs
-  - openssh-server
-volumes:
-  - "~/Projects:/home/noetic/Projects:rw"
 environment:
-  TERM: xterm-256color
   ROS_MASTER_URI: "http://localhost:11311"
   ROS_HOSTNAME: "localhost"
 network_mode: "host"

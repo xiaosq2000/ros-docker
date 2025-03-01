@@ -225,8 +225,141 @@ GID={os.getgid()}
             Panel.fit(
                 f"[bold green]Next Steps:[/bold green]\n"
                 f"cd {output_dir}\n"
-                f"docker compose -f docker-compose.{ros_distro}.yml up --build",
+                f"docker compose -f docker-compose.{ros_distro}.yml up --build -d",
                 title="Build and Run",
+            )
+        )
+
+
+def get_available_dev_profiles():
+    """Get list of available development profiles from config files."""
+    profiles = [
+        f.replace(".yaml", "")
+        for f in os.listdir("configs/dev_profiles")
+        if f.endswith(".yaml")
+    ]
+    return sorted(profiles)
+
+
+@cli.command("list-profiles")
+def list_dev_profiles():
+    """List available development profiles."""
+    profiles = get_available_dev_profiles()
+
+    # Create a table to display available profiles
+    table = Table(title="Available Development Profiles")
+    table.add_column("Profile", style="cyan")
+    table.add_column("Packages", style="green")
+    table.add_column("URL", style="magenta")
+
+    for profile in profiles:
+        try:
+            with open(f"configs/dev_profiles/{profile}.yaml", "r") as f:
+                config = yaml.safe_load(f)
+                table.add_row(
+                    profile,
+                    ", ".join(config.get("dev_packages", [])[:3])
+                    + ("..." if len(config.get("dev_packages", [])) > 3 else ""),
+                    config.get("url")
+                )
+        except FileNotFoundError:
+            table.add_row(profile, "N/A")
+
+    console.print(table)
+
+
+@cli.command("generate-dev")
+@click.argument("ros_distro", required=True)
+@click.option(
+    "--profile",
+    "-p",
+    default="default",
+    help="Development profile to use.",
+)
+@click.option(
+    "--output-dir",
+    "-o",
+    default="generated",
+    help="Output directory for generated files.",
+)
+@click.option(
+    "--preview", is_flag=True, help="Preview the generated files without saving."
+)
+def generate_dev(ros_distro, profile, output_dir, preview):
+    """Generate development Docker files for a specific ROS distribution."""
+    # Check if the ROS distribution is available
+    available_distros = get_available_ros_distros()
+    if ros_distro not in available_distros:
+        console.print(
+            f"[bold red]Error:[/bold red] ROS distribution '[bold cyan]{ros_distro}[/bold cyan]' not found."
+        )
+        return
+
+    # Check if the development profile is available
+    available_profiles = get_available_dev_profiles()
+    if profile not in available_profiles:
+        console.print(
+            f"[bold red]Error:[/bold red] Development profile '[bold cyan]{profile}[/bold cyan]' not found."
+        )
+        return
+
+    # Load the ROS config
+    with open(f"configs/ros_{ros_distro}.yaml", "r") as f:
+        ros_config = yaml.safe_load(f)
+
+    # Load the development profile
+    with open(f"configs/dev_profiles/{profile}.yaml", "r") as f:
+        dev_config = yaml.safe_load(f)
+
+    # Merge configurations
+    config = {**ros_config, **dev_config}
+
+    # Override image name for the development image
+    config["base_image_name"] = ros_config["image_name"]
+    config["image_name"] = f"{ros_config['image_name']}-{profile}"
+    config["container_name"] = f"{ros_config['container_name']}-{profile}"
+
+    # Generate Dockerfile.dev
+    output_dockerfile = f"{output_dir}/Dockerfile.{ros_distro}.{profile}"
+    if preview:
+        env = Environment(loader=FileSystemLoader("templates"))
+        template = env.get_template("Dockerfile.dev.j2")
+        output = template.render(**config)
+        console.print(
+            Panel(
+                Syntax(output, "dockerfile", theme="monokai", line_numbers=True),
+                title=f"Dockerfile.{ros_distro}.{profile}",
+                subtitle="Preview",
+            )
+        )
+    else:
+        render_template("Dockerfile.dev.j2", config, output_dockerfile)
+
+    # Update docker-compose to use the dev image
+    config["dockerfile_path"] = f"Dockerfile.{ros_distro}.{profile}"
+    output_compose = f"{output_dir}/docker-compose.{ros_distro}.{profile}.yml"
+    if preview:
+        env = Environment(loader=FileSystemLoader("templates"))
+        template = env.get_template("docker-compose.yml.j2")
+        output = template.render(**config)
+        console.print(
+            Panel(
+                Syntax(output, "yaml", theme="monokai", line_numbers=True),
+                title=f"docker-compose.{ros_distro}.{profile}.yml",
+                subtitle="Preview",
+            )
+        )
+    else:
+        render_template("docker-compose.yml.j2", config, output_compose)
+
+    if not preview:
+        # Show next steps
+        console.print(
+            Panel.fit(
+                f"[bold green]Next Steps:[/bold green]\n"
+                f"cd {output_dir}\n"
+                f"docker compose -f docker-compose.{ros_distro}.{profile}.yml up --build -d",
+                title="Build and Run Development Environment",
             )
         )
 
