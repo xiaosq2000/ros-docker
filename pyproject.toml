@@ -17,7 +17,7 @@ license = { file = "LICENSE" }
 dev = ["ruff>=0.9.7"]
 
 [project.scripts]
-ros-docker = "ros_docker.main:cli"
+ros-docker = "ros_docker.cli:main"
 
 [build-system]
 requires = ["hatchling"]

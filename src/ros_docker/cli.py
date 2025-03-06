@@ -7,38 +7,10 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.syntax import Syntax
 from jinja2 import Environment, FileSystemLoader
+from .utils import get_available_ros_distros, get_available_dev_profiles, render_template
 
 # Initialize Rich console
 console = Console()
-
-
-def get_available_ros_distros():
-    """Get list of available ROS distributions from config files."""
-    configs = [
-        f.replace("ros_", "").replace(".yaml", "")
-        for f in os.listdir("configs")
-        if f.startswith("ros_") and f.endswith(".yaml")
-    ]
-    return sorted(configs)
-
-
-def render_template(template_file, config, output_file):
-    """Render a Jinja2 template with the given config and save to output_file."""
-    # Set up Jinja2 environment
-    env = Environment(loader=FileSystemLoader("templates"))
-    template = env.get_template(template_file)
-
-    # Render the template with the config
-    output = template.render(**config)
-
-    # Ensure the output directory exists
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-
-    # Write the rendered template to the output file
-    with open(output_file, "w") as f:
-        f.write(output)
-
-    return output_file
 
 
 @click.group(
@@ -47,14 +19,14 @@ def render_template(template_file, config, output_file):
 )
 @click.version_option(version="0.2.1")
 @click.pass_context
-def cli(ctx):
+def main(ctx):
     """Generate Docker files for ROS (Robot Operating System) distributions."""
     # If no command is provided, show help
     if ctx.invoked_subcommand is None:
-        click.echo(cli.get_help(ctx))
+        click.echo(main.get_help(ctx))
 
 
-@cli.command("list")
+@main.command("list")
 def list_distributions():
     """List available ROS distributions."""
     distributions = get_available_ros_distros()
@@ -80,7 +52,7 @@ def list_distributions():
     console.print(table)
 
 
-@cli.command("generate")
+@main.command("generate")
 @click.argument("ros_distro", required=True)
 @click.option(
     "--output-dir",
@@ -231,17 +203,7 @@ GID={os.getgid()}
         )
 
 
-def get_available_dev_profiles():
-    """Get list of available development profiles from config files."""
-    profiles = [
-        f.replace(".yaml", "")
-        for f in os.listdir("configs/dev_profiles")
-        if f.endswith(".yaml")
-    ]
-    return sorted(profiles)
-
-
-@cli.command("list-profiles")
+@main.command("list-profiles")
 def list_dev_profiles():
     """List available development profiles."""
     profiles = get_available_dev_profiles()
@@ -268,7 +230,7 @@ def list_dev_profiles():
     console.print(table)
 
 
-@cli.command("generate-dev")
+@main.command("generate-dev")
 @click.argument("ros_distro", required=True)
 @click.option(
     "--profile",
@@ -365,4 +327,4 @@ def generate_dev(ros_distro, profile, output_dir, preview):
 
 
 if __name__ == "__main__":
-    cli()
+    main()
