@@ -2,12 +2,18 @@
 import os
 import yaml
 import click
+import git
+import toml
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from rich.syntax import Syntax
 from jinja2 import Environment, FileSystemLoader
-from .utils import get_available_ros_distros, get_available_dev_profiles, render_template
+from .utils import (
+    get_available_ros_distros,
+    get_available_dev_profiles,
+    render_template,
+)
 
 # Initialize Rich console
 console = Console()
@@ -17,7 +23,13 @@ console = Console()
     invoke_without_command=True,
     context_settings=dict(help_option_names=["-h", "--help"]),
 )
-@click.version_option(version="0.2.1")
+@click.version_option(
+    version=toml.load(
+        os.path.join(
+            git.Repo(search_parent_directories=True).working_tree_dir, "pyproject.toml"
+        )
+    )["project"]["version"]
+)
 @click.pass_context
 def main(ctx):
     """Generate Docker files for ROS (Robot Operating System) distributions."""
