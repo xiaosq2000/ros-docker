@@ -35,7 +35,7 @@ extra_commands:
   - ". $HOME/.cargo/env && curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/yazi.sh | zsh"
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/tpm.sh | zsh"
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/google_drive_upload.sh | zsh"
-  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/lazydocker.sh | zsh"
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/lazygit.sh | zsh"
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/luarocks.sh | zsh"
   # git setup
   - "git config --global user.name 'Shuqi Xiao' && git config --global user.email 'xiaosq2000@gmail.com'"
