@@ -45,7 +45,7 @@ def render_template(template_file, config, output_file):
     invoke_without_command=True,
     context_settings=dict(help_option_names=["-h", "--help"]),
 )
-@click.version_option(version="1.0.0")
+@click.version_option(version="0.2.1")
 @click.pass_context
 def cli(ctx):
     """Generate Docker files for ROS (Robot Operating System) distributions."""
@@ -260,7 +260,7 @@ def list_dev_profiles():
                     profile,
                     ", ".join(config.get("dev_packages", [])[:3])
                     + ("..." if len(config.get("dev_packages", [])) > 3 else ""),
-                    config.get("url")
+                    config.get("url"),
                 )
         except FileNotFoundError:
             table.add_row(profile, "N/A")

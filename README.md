@@ -21,21 +21,21 @@ git clone https://github.com/xiaosq2000/ros-docker.git
 cd ros-docker
 ```
 
-> [!NOTE]
-> If `uv` is unavailable:
-> 1. Install the dependencies at first:
->  ```bash
->  python -m venv .venv
->  source .venv/bin/activate
->  pip install -e .
->  ```
-> 2. In the following shell commands, use `python` instead of `uv run`.
+> [!NOTE] 
+> If `uv` unavailable:
+> 1. You need install first
+>    ```bash
+>    python -m venv .venv
+>    source .venv/bin/activate
+>    pip install .
+>    ```
+> 2. Replace `uv run ros-docker` with `python -m ros-docker.main` in all following commands
 
 ### List Available ROS Distributions
 
 To see all available ROS distributions that can be generated:
 ```bash
-uv run ros-docker.py list
+uv run ros-docker list
 ```
 
 [![asciicast-list](https://asciinema.org/a/lV1pG47m55K2QqsFPQHpZcjIl.svg)](https://asciinema.org/a/lV1pG47m55K2QqsFPQHpZcjIl)
@@ -47,7 +47,7 @@ Take ROS1 Noetic as an example.
 Generate Docker files for a specific ROS distribution:
 
 ```bash
-uv run ros-docker.py generate noetic
+uv run ros-docker generate noetic
 ```
 
 [![asciicast-generate](https://asciinema.org/a/9SKLe3k4ZMxfw279FfsKTJ7yV.svg)](https://asciinema.org/a/9SKLe3k4ZMxfw279FfsKTJ7yV)
@@ -55,11 +55,11 @@ uv run ros-docker.py generate noetic
 > [!TIP]
 > 1. Preview the generated files without saving them:
 >    ```bash
->    uv run ros-docker.py generate noetic --preview
+>    uv run ros-docker generate noetic --preview
 >    ```
 > 2. Specify a custom output directory (default: './generated'):
 >    ```bash
->    uv run ros-docker.py generate noetic --output-dir ./generated/noetic 
+>    uv run ros-docker generate noetic --output-dir ./generated/noetic 
 >    ```
 
 ### Build and Run
@@ -92,6 +92,6 @@ The tool supports creating development environments with custom tooling and conf
 Create your own development profiles by adding YAML files to the `configs/dev_profiles/` directory.
 
 ```bash
-uv run ros-docker.py list-profiles
-uv run ros-docker.py generate-dev <ros-distro> --profile <your-profile>
+uv run ros-docker list-profiles
+uv run ros-docker generate-dev <ros-distro> --profile <your-profile>
 ```

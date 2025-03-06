@@ -1,7 +1,8 @@
 [project]
 name = "ros-docker"
-version = "0.2.0"
+version = "0.2.1"
 description = "Generate Docker environments for various ROS (Robot Operating System) distributions"
+authors = [{ name = "Shuqi Xiao", email = "xiaosq2000@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -10,9 +11,14 @@ dependencies = [
     "pyyaml>=6.0.2",
     "rich>=13.9.4",
 ]
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 
 [dependency-groups]
-dev = [
-    "ruff>=0.9.7",
-]
+dev = ["ruff>=0.9.7"]
+
+[project.scripts]
+ros-docker = "ros_docker.main:cli"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
