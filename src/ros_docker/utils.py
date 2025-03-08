@@ -22,7 +22,7 @@ def get_available_dev_profiles():
     return sorted(profiles)
 
 
-def render_template(template_file, config, output_file):
+def render_template(template_file, config, output_file, save=True):
     """Render a Jinja2 template with the given config and save to output_file."""
     # Set up Jinja2 environment
     env = Environment(loader=FileSystemLoader("templates"))
@@ -31,11 +31,11 @@ def render_template(template_file, config, output_file):
     # Render the template with the config
     output = template.render(**config)
 
-    # Ensure the output directory exists
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    if save:
+        # Ensure the output directory exists
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        # Write the rendered template to the output file
+        with open(output_file, "w") as f:
+            f.write(output)
 
-    # Write the rendered template to the output file
-    with open(output_file, "w") as f:
-        f.write(output)
-
-    return output_file
+    return output

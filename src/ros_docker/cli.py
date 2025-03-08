@@ -14,6 +14,11 @@ from .utils import (
     get_available_dev_profiles,
     render_template,
 )
+from .generate import (
+    generate_env_file,
+    generate_dockerfile,
+    generate_docker_compose,
+)
 
 # Initialize Rich console
 console = Console()
@@ -88,20 +93,6 @@ def generate(ros_distro, output_dir, preview):
         )
         return
 
-    # Load the config for the specified ROS distribution
-    config_file = f"configs/ros_{ros_distro}.yaml"
-    try:
-        with open(config_file, "r") as f:
-            config = yaml.safe_load(f)
-            console.print(
-                f"Loaded configuration for [bold cyan]{ros_distro}[/bold cyan]"
-            )
-    except FileNotFoundError:
-        console.print(
-            f"[bold red]Error:[/bold red] Config file not found for ROS distribution: [bold cyan]{ros_distro}[/bold cyan]"
-        )
-        return
-
     if preview:
         console.print(
             Panel.fit(
@@ -110,66 +101,78 @@ def generate(ros_distro, output_dir, preview):
             )
         )
 
-    generated_files = []
-
     # Generate Dockerfile
-    output_dockerfile = f"{output_dir}/Dockerfile.{ros_distro}"
+    dockerfile_content = generate_dockerfile(
+        output_dir=output_dir, ros_distro=ros_distro, save=not preview
+    )
+
+    # Generate docker-compose.yml
+    docker_compose_content = generate_docker_compose(
+        output_dir=output_dir, ros_distro=ros_distro, save=not preview
+    )
+
+    # Generate .env
+    env_file_content = generate_env_file(output_dir=output_dir, save=not preview)
+
     if preview:
-        env = Environment(loader=FileSystemLoader("templates"))
-        template = env.get_template("Dockerfile.j2")
-        output = template.render(**config)
         console.print(
             Panel(
-                Syntax(output, "dockerfile", theme="monokai", line_numbers=True),
+                Syntax(
+                    dockerfile_content, "dockerfile", theme="monokai", line_numbers=True
+                ),
                 title=f"Dockerfile.{ros_distro}",
                 subtitle="Preview",
             )
         )
-    else:
-        generated_files.append(
-            render_template("Dockerfile.j2", config, output_dockerfile)
-        )
-
-    # Generate docker-compose.yml
-    output_compose = f"{output_dir}/docker-compose.{ros_distro}.yml"
-    if preview:
-        env = Environment(loader=FileSystemLoader("templates"))
-        template = env.get_template("docker-compose.yml.j2")
-        output = template.render(**config)
         console.print(
             Panel(
-                Syntax(output, "yaml", theme="monokai", line_numbers=True),
+                Syntax(
+                    docker_compose_content, "yaml", theme="monokai", line_numbers=True
+                ),
                 title=f"docker-compose.{ros_distro}.yml",
                 subtitle="Preview",
             )
         )
-    else:
-        generated_files.append(
-            render_template("docker-compose.yml.j2", config, output_compose)
-        )
-
-    # Generate .env
-    output_envfile = f"{output_dir}/.env"
-    env_content = f"""COMPOSE_BAKE=true
-UID={os.getuid()}
-GID={os.getgid()}
-"""
-
-    if preview:
         console.print(
             Panel(
-                Syntax(env_content, "bash", theme="monokai", line_numbers=True),
+                Syntax(env_file_content, "sh", theme="monokai", line_numbers=True),
                 title=".env",
                 subtitle="Preview",
             )
         )
     else:
-        # Ensure the output directory exists
-        os.makedirs(os.path.dirname(output_envfile), exist_ok=True)
+        generated_file_paths = [
+            f"{output_dir}/Dockerfile.{ros_distro}",
+            f"{output_dir}/docker-compose.{ros_distro}.yml",
+            f"{output_dir}/.env",
+        ]
 
-        with open(output_envfile, "w") as f:
-            f.write(env_content)
-        generated_files.append(output_envfile)
+        # Create a table to display generated files
+        table = Table(title="Generated Files")
+        table.add_column("File", style="cyan")
+        table.add_column("Path", style="green")
+
+        for file in generated_file_paths:
+            table.add_row(os.path.basename(file), file)
+
+        console.print(table)
+
+        # Show next steps
+        console.print("[bold cyan]Next Steps:[/bold cyan]")
+
+        console.print(
+            Panel.fit(
+                f"cd {output_dir}\n"
+                f"docker compose -f docker-compose.{ros_distro}.yml up --build -d",
+                title="build and run",
+            )
+        )
+        console.print(
+            Panel.fit(
+                f"docker exec -it ros-{ros_distro}-container bash",
+                title="interact with the ROS container",
+            )
+        )
 
     # # TODO:
     # # Generate entrypoint.sh
@@ -192,27 +195,6 @@ GID={os.getgid()}
     #         )
     #         # Make entrypoint executable
     #         os.chmod(output_entrypoint, 0o755)
-
-    if not preview and generated_files:
-        # Create a table to display generated files
-        table = Table(title="Generated Files")
-        table.add_column("File", style="cyan")
-        table.add_column("Path", style="green")
-
-        for file in generated_files:
-            table.add_row(os.path.basename(file), file)
-
-        console.print(table)
-
-        # Show next steps
-        console.print(
-            Panel.fit(
-                f"[bold green]Next Steps:[/bold green]\n"
-                f"cd {output_dir}\n"
-                f"docker compose -f docker-compose.{ros_distro}.yml up --build -d",
-                title="Build and Run",
-            )
-        )
 
 
 @main.command("list-profiles")
