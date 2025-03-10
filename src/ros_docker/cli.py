@@ -157,20 +157,15 @@ def generate(ros_distro, output_dir, preview):
 
         console.print(table)
 
-        # Show next steps
-        console.print("[bold cyan]Next Steps:[/bold cyan]")
-
+        # Next steps
         console.print(
             Panel.fit(
+                "[green]# build and run[/green]\n"
                 f"cd {output_dir}\n"
-                f"docker compose -f docker-compose.{ros_distro}.yml up --build -d",
-                title="build and run",
-            )
-        )
-        console.print(
-            Panel.fit(
+                f"docker compose -f docker-compose.{ros_distro}.yml up --build -d\n"
+                "[green]# interact with the container[/green]\n"
                 f"docker exec -it ros-{ros_distro}-container bash",
-                title="interact with the ROS container",
+                title="Next Steps",
             )
         )
 
