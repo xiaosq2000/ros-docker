@@ -1,7 +1,6 @@
 url: "https://github.com/xiaosq2000/dotfiles"
 dev_packages:
   - zsh
-  - neovim
   - tmux
   - fd-find
   - ripgrep
@@ -9,13 +8,14 @@ dev_packages:
   - wl-clipboard
   - git-lfs
   - openssh-server
-  - file
+  - file # dependency for yazi and google_drive_upload
   - curl
   - wget
   - unzip
-  # - fzf # maybe too old
   - jq
   - htop
+  - libusb-dev
+  - python3-catkin-tools
 
 # zsh
 zsh_version: 5.9
@@ -26,20 +26,31 @@ zsh_by_default: true
 neovim_version: 0.10.4
 
 extra_commands:
-  # my dotfiles and utilities 
+  # install dotfiles
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/install.sh | bash"
+  # starship
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/starship.sh | zsh"
+  # rust toolchain
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/rust.sh | zsh"
+  # node toolchain
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/node.sh | zsh"
+  # fzf
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/fzf.sh | zsh"
+  # yazi
   - ". $HOME/.cargo/env && curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/yazi.sh | zsh"
+  # tpm
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/tpm.sh | zsh"
-  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/google_drive_upload.sh | zsh"
+  # lazygit
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/lazygit.sh | zsh"
+  # luarocks
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/luarocks.sh | zsh"
+  # google_drive_upload
+  - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/google_drive_upload.sh | zsh"
   # git setup
   - "git config --global user.name 'Shuqi Xiao' && git config --global user.email 'xiaosq2000@gmail.com'"
   - "git lfs install"
+  # Neovim 
+  - "nvim --headless \"+Lazy! sync\" +qa"
 
 volumes:
   - "~/Projects:/home/noetic/Projects:rw"
