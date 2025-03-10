@@ -307,10 +307,10 @@ def generate_dev(ros_distro, profile, output_dir, preview):
         # Show next steps
         console.print(
             Panel.fit(
-                f"[bold green]Next Steps:[/bold green]\n"
+                f"[green]# build and run development environment[/green]\n"
                 f"cd {output_dir}\n"
                 f"docker compose -f docker-compose.{ros_distro}.{profile}.yml up --build -d",
-                title="Build and Run Development Environment",
+                title="Next Steps",
             )
         )
 
