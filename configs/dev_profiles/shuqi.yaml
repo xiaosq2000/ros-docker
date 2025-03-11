@@ -34,6 +34,10 @@ extra_commands:
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/rust.sh | zsh"
   # node toolchain
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/node.sh | zsh"
+  # uv
+  - curl -LsSf https://astral.sh/uv/install.sh | UV_NO_MODIFY_PATH=1 bash
+  # pixi
+  - curl -fsSL https://pixi.sh/install.sh | PIXI_NO_PATH_UPDATE=1 bash
   # fzf
   - "curl -fsSL https://raw.githubusercontent.com/xiaosq2000/dotfiles/main/.sh_utils/setup.d/fzf.sh | zsh"
   # yazi
